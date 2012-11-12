@@ -1,0 +1,273 @@
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+        >
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.rhq</groupId>
+        <artifactId>rhq-plugins-parent</artifactId>
+        <version>4.5.1</version><!-- TODO adjust RHQ version -->
+    </parent>
+
+    <groupId>org.rhq</groupId>
+    <artifactId>aquarium-plugin</artifactId>
+    <packaging>jar</packaging>
+
+    <name>RHQ aquarium Plugin</name>
+
+    <properties>
+      <rhq.version>4.5.1</rhq.version> <!-- TODO adjust, see above too -->
+      <jackson.version>1.9.10</jackson.version>
+      <resteasy.version>3.0-beta-1</resteasy.version>
+
+    </properties>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-libs</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                   <groupId>org.jboss.resteasy</groupId>
+                   <artifactId>resteasy-client</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jboss.resteasy</groupId>
+                  <artifactId>jaxrs-api</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jboss.resteasy</groupId>
+                  <artifactId>resteasy-jaxrs</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.httpcomponents</groupId>
+                  <artifactId>httpclient</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.httpcomponents</groupId>
+                  <artifactId>httpcore</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jboss.resteasy</groupId>
+                  <artifactId>resteasy-jackson-provider</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.codehaus.jackson</groupId>
+                  <artifactId>jackson-jaxrs</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.codehaus.jackson</groupId>
+                  <artifactId>jackson-core-asl</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.codehaus.jackson</groupId>
+                  <artifactId>jackson-mapper-asl</artifactId>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+
+            <properties>
+                <rhq.rootDir>../../..</rhq.rootDir>
+                <rhq.containerDir>${rhq.rootDir}/${rhq.defaultDevContainerPath}</rhq.containerDir>
+                <rhq.deploymentDir>${rhq.containerDir}/jbossas/server/default/deploy/${rhq.earName}/rhq-downloads/rhq-plugins</rhq.deploymentDir>
+            </properties>
+
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.1</version>
+                        <executions>
+
+                            <execution>
+                                <id>deploy</id>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <tasks>
+                                        <mkdir dir="${rhq.deploymentDir}"/>
+                                        <property name="deployment.file"
+                                                  location="${rhq.deploymentDir}/${project.build.finalName}.jar"/>
+                                        <echo>*** Updating ${deployment.file}...</echo>
+                                        <jar destfile="${deployment.file}" basedir="${project.build.outputDirectory}"/>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>deploy-jar-meta-inf</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <tasks>
+                                        <property name="deployment.file"
+                                                  location="${rhq.deploymentDir}/${project.build.finalName}.jar"/>
+                                        <echo>*** Updating META-INF dir in ${deployment.file}...</echo>
+                                        <unjar src="${project.build.directory}/${project.build.finalName}.jar"
+                                               dest="${project.build.outputDirectory}">
+                                            <patternset>
+                                                <include name="META-INF/**"/>
+                                            </patternset>
+                                        </unjar>
+                                        <jar destfile="${deployment.file}"
+                                             manifest="${project.build.outputDirectory}/META-INF/MANIFEST.MF"
+                                             update="true">
+                                        </jar>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+
+                            <execution>
+                                <id>undeploy</id>
+                                <phase>clean</phase>
+                                <configuration>
+                                    <tasks>
+                                        <property name="deployment.file"
+                                                  location="${rhq.deploymentDir}/${project.build.finalName}.jar"/>
+                                        <echo>*** Deleting ${deployment.file}...</echo>
+                                        <delete file="${deployment.file}"/>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
+
+
+        <repositories>
+            <repository>
+                <snapshots>
+                    <enabled>false</enabled>
+                </snapshots>
+                <id>jboss</id>
+                <name>JBoss Repository</name>
+                <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            </repository>
+            <!-- TODO add your own maven repositories here (if needed) -->
+        </repositories>
+
+        <pluginRepositories>
+            <pluginRepository>
+                <snapshots>
+                    <enabled>false</enabled>
+                </snapshots>
+                <id>jboss</id>
+                <name>JBoss Plugin Repository</name>
+                <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            </pluginRepository>
+        </pluginRepositories>
+
+
+        <dependencies>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.rhq</groupId>
+                <artifactId>rhq-core-domain</artifactId>
+                <version>${rhq.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.rhq</groupId>
+                <artifactId>rhq-core-plugin-api</artifactId>
+                <version>${rhq.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.rhq</groupId>
+                <artifactId>rhq-core-native-system</artifactId>
+                <version>${rhq.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- add other dependencies here -->
+
+          <dependency>
+             <groupId>org.jboss.resteasy</groupId>
+             <artifactId>resteasy-client</artifactId>
+             <version>${resteasy.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>jaxrs-api</artifactId>
+            <version>${resteasy.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>${resteasy.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.2</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.1.2</version>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>${resteasy.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>1.9.10</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.10</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.10</version>
+          </dependency>
+
+
+
+        </dependencies>
+</project>

@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<plugin name="aquarium"
+        displayName="aquariumPlugin"
+        description="Monitoring of Glassfish server"
+        package="org.rhq.modules.plugins.aquarium"
+        xmlns="urn:xmlns:rhq-plugin"
+        xmlns:c="urn:xmlns:rhq-configuration">
+
+
+  <server name="Aquarium"
+          discovery="BaseDiscovery"
+          class="BaseComponent"
+          supportsManualAdd="true"
+      >
+
+    <plugin-configuration>
+      <c:simple-property name="host" default="localhost" required="true" description="Host to connect to"/>
+      <c:simple-property name="port" default="4848" type="integer" required="true" description="Server admin port"/>
+      <c:simple-property name="user" description="Management user"/>
+      <c:simple-property name="password" type="password" description="Password of the management user"/>
+      <c:simple-property name="path" default="domain/server" readOnly="true"/>
+    </plugin-configuration>
+
+    <service name="jvm"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="jvm" readOnly="true"/>
+      </plugin-configuration>
+    <service name="class-loading-system"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="class-loading-system" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="loadedclass-count" displayName="LoadedClassCount" units="none"
+        description="Number of classes currently loaded in the Java virtual machine"/>
+      <metric property="totalloadedclass-count" displayName="TotalLoadedClassCount" units="none"
+        description="Total number of classes that have been loaded since the Java virtual machine has started execution"/>
+      <metric property="unloadedclass-count" displayName="UnLoadedClassCount" units="none"
+        description="Total number of classes unloaded since the Java virtual machine has started execution"/>
+    </service>
+    <service name="compilation-system"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="compilation-system" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="name-current" displayName="Name" dataType="trait"
+        description="Name of the Just-in-time (JIT) compiler"/>
+      <metric property="totalcompilationtime-current" displayName="TotalCompilationTime" units="milliseconds"
+        description="Approximate accumlated elapsed time (in milliseconds) spent in compilation"/>
+    </service>
+    <service name="garbage-collectors"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="garbage-collectors" readOnly="true"/>
+      </plugin-configuration>
+    </service>
+    <service name="memory"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="memory" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="committedheapsize-count" displayName="CommittedHeapSize" units="bytes"
+        description="Amount of memory in bytes that is committed for the Java virtual machine to use"/>
+      <metric property="committednonheapsize-count" displayName="CommittedNonHeapSize" units="bytes"
+        description="Amount of memory in bytes that is committed for the Java virtual machine to use"/>
+      <metric property="initheapsize-count" displayName="InitialHeapSize" units="bytes"
+        description="Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management"/>
+      <metric property="initnonheapsize-count" displayName="InitialNonHeapSize" units="bytes"
+        description="Amount of memory in bytes that the Java virtual machine initially requests from the operating system for memory management"/>
+      <metric property="maxheapsize-count" displayName="MaxHeapSize" units="bytes"
+        description="Maximum amount of memory in bytes that can be used for memory management"/>
+      <metric property="maxnonheapsize-count" displayName="MaxNonHeapSize" units="bytes"
+        description="Maximum amount of memory in bytes that can be used for memory management"/>
+      <metric property="objectpendingfinalizationcount-count" displayName="ObjectsPendingFinalization" units="none"
+        description="Approximate number of objects for which finalization is pending"/>
+      <metric property="usedheapsize-count" displayName="UsedHeapSize" units="bytes"
+        description="Amount of used memory in bytes"/>
+      <metric property="usednonheapsize-count" displayName="UsedNonHeapSize" units="bytes"
+        description="Amount of used memory in bytes"/>
+    </service>
+    <service name="operating-system"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="operating-system" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="arch-current" displayName="Architecture" dataType="trait"
+        description="Operating system architecture"/>
+      <metric property="availableprocessors-count" displayName="AvailableProcessors" units="none"
+        description="Number of processors available to the Java virtual machine"/>
+      <metric property="name-current" displayName="Name" dataType="trait"
+        description="Operating system name"/>
+      <metric property="version-current" displayName="Version" dataType="trait"
+        description="operating system version"/>
+    </service>
+    <service name="runtime"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="runtime" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="bootclasspath-current" displayName="BootClassPath" dataType="trait"
+        description="Boot class path that is used by the bootstrap class loader to search for class files"/>
+      <metric property="classpath-current" displayName="ClassPath" dataType="trait"
+        description="Java class path that is used by the system class loader to search for class files"/>
+      <metric property="inputarguments-current" displayName="InputArguments" dataType="trait"
+        description="Input arguments passed to the Java virtual machine which does not include the arguments to the main method"/>
+      <metric property="librarypath-current" displayName="LibraryPath" dataType="trait"
+        description="Java library path"/>
+      <metric property="managementspecversion-current" displayName="ManagementSpecVersion" dataType="trait"
+        description="Version of the specification for the management interface implemented by the running Java virtual machine"/>
+      <metric property="name-current" displayName="Name" dataType="trait"
+        description="Name representing the running Java virtual machine"/>
+      <metric property="specname-current" displayName="SpecName" dataType="trait"
+        description="Java virtual machine specification name"/>
+      <metric property="specvendor-current" displayName="SpecVendor" dataType="trait"
+        description="Java virtual machine specification vendor"/>
+      <metric property="specversion-current" displayName="SpecVersion" dataType="trait"
+        description="Java virtual machine specification version"/>
+      <metric property="uptime-count" displayName="Uptime" units="milliseconds"
+        description="Uptime of the Java virtual machine in milliseconds"/>
+      <metric property="vmname-current" displayName="VmName" dataType="trait"
+        description="Java virtual machine implementation name"/>
+      <metric property="vmvendor-current" displayName="VmVendor" dataType="trait"
+        description="Java virtual machine implementation vendor"/>
+      <metric property="vmversion-current" displayName="VmVersion" dataType="trait"
+        description="Java virtual machine implementation version"/>
+    </service>
+    <service name="thread-system"
+        class="BaseComponent"
+        discovery="SubsystemDiscovery"
+    >
+      <plugin-configuration>
+        <c:simple-property name="path" default="thread-system" readOnly="true"/>
+      </plugin-configuration>
+      <metric property="allthreadids" displayName="LiveThreads" dataType="trait"
+        description="Returns all live thread IDs"/>
+      <metric property="currentthreadcputime" displayName="CurrentThreadCpuTime" units="nanoseconds"
+        description="Returns the total CPU time for the current thread in nanoseconds"/>
+      <metric property="currentthreadusertime" displayName="CurrentThreadUserTime" units="nanoseconds"
+        description="Returns the CPU time that the current thread has executed in user mode in nanoseconds"/>
+      <metric property="daemonthreadcount" displayName="DaemonThreadCount" units="none"
+        description="Returns the current number of live daemon threads"/>
+      <metric property="deadlockedthreads" displayName="DeadlockedThreads" dataType="trait"
+        description="Finds cycles of threads that are in deadlock waiting to acquire object monitors or ownable synchronizers"/>
+      <metric property="monitordeadlockedthreads" displayName="MonitorDeadlockedThreads" dataType="trait"
+        description="Finds cycles of threads that are in deadlock waiting to acquire object monitors"/>
+      <metric property="peakthreadcount" displayName="PeakThreadCount" units="none"
+        description="Returns the peak live thread count since the Java virtual machine started or peak was reset"/>
+      <metric property="threadcount" displayName="ThreadCount" units="none"
+        description="Returns the current number of live threads including both daemon and non-daemon threads"/>
+      <metric property="totalstartedthreadcount" displayName="TotalStartedThreadCount" units="none"
+        description="Returns the total number of threads created and also started since the Java virtual machine started"/>
+    </service>
+    </service>
+
+
+  </server>
+
+</plugin>
